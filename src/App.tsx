@@ -15,6 +15,7 @@ const quotes = [
 
 function App() {
   const [name, setName] = useState<string>("");
+  const [duration, setDuration] = useState<number>(10);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [message, setMessage] = useState<string>("");
   const [quote, setQuote] = useState<string>("");
@@ -33,7 +34,14 @@ function App() {
       );
       showRandomQuote();
     }
-  }, [timeLeft, intervalId, name]);
+  }, [timeLeft, intervalId]);
+
+  useEffect(() => {
+    const savedName = localStorage.getItem("username");
+    if (savedName) {
+      setName(savedName);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -48,6 +56,7 @@ function App() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
+    localStorage.setItem("username", e.target.value);
     setMessage("");
     setQuote("");
     setTimeLeft(null);
@@ -63,7 +72,7 @@ function App() {
 
     setMessage("");
     setQuote("");
-    setTimeLeft(10);
+    setTimeLeft(duration);
     setHasStarted(true);
 
     const id = window.setInterval(() => {
@@ -86,9 +95,20 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white text-black px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white text-black px-4">
+      {/* Progress Bar */}
+      {timeLeft !== null && (
+        <div className="absolute top-20 w-1/2 h-4 bg-gray-200 border border-black rounded overflow-hidden mb-4">
+          <div
+            className="h-full bg-blue-600 transition-all duration-100 ease-linear"
+            style={{ width: `${((duration - timeLeft) / duration) * 100}%` }}
+          />
+        </div>
+      )}
+
+      {/* Detials Input */}
       <div className="text-center w-full max-w-sm">
-        <h1 className="text-xl font-medium mb-4">Enter your name</h1>
+        <h1 className="text-xl font-medium mb-4">Enter Details</h1>
         <input
           type="text"
           value={name}
@@ -97,10 +117,22 @@ function App() {
           disabled={timeLeft !== null}
           className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
         />
+
+        <select
+          value={duration}
+          onChange={(e) => setDuration(Number(e.target.value))}
+          disabled={timeLeft !== null}
+          className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
+        >
+          <option value={10}>10 seconds</option>
+          <option value={20}>20 seconds</option>
+          <option value={30}>30 seconds</option>
+        </select>
+
         <button
           onClick={startTimer}
           disabled={!name.trim() || timeLeft !== null}
-          className="w-full px-3 py-2 bg-black text-white rounded disabled:opacity-50"
+          className="w-full px-3 py-2 bg-blue-700 text-white rounded disabled:opacity-50"
         >
           {counter === 0 ? "Start Timer" : "Try Again"}
         </button>
@@ -120,7 +152,12 @@ function App() {
           </p>
         )}
 
-        {message && <p className="mt-4 font-semibold">{message}</p>}
+        {/* Output */}
+        {message && (
+          <p className="mt-6 font-semibold text-blue-700 transition-all duration-700 ease-out scale-100 opacity-100 animate-bounce">
+            {message}
+          </p>
+        )}
         {quote && <p className="mt-2 italic text-gray-600">"{quote}"</p>}
       </div>
     </div>
