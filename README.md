@@ -52,3 +52,5 @@ export default tseslint.config({
   },
 })
 ```
+
+This app is deployed on vercel: https://timer-motivator.vercel.app/
