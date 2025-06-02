@@ -1,35 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [name, setName] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [intervalId, setIntervalId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      clearInterval(intervalId!);
+      setIntervalId(null);
+      setMessage(`You did it, ${name}!`);
+      setTimeLeft(null);
+    }
+  }, [timeLeft, intervalId, name]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [intervalId]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    setMessage("");
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+    setTimeLeft(null); // Reset timer on input change
+  };
+
+  const startTimer = () => {
+    if (!name.trim()) return;
+
+    setMessage("");
+    setTimeLeft(10);
+
+    const id = window.setInterval(() => {
+      setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    setIntervalId(id);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="min-h-screen flex items-center justify-center bg-white text-black px-4">
+      <div className="text-center w-full max-w-sm">
+        <h1 className="text-xl font-medium mb-4">Enter your name</h1>
+        <input
+          type="text"
+          value={name}
+          onChange={handleInputChange}
+          placeholder="Your name"
+          disabled={timeLeft !== null}
+          className="w-full px-3 py-2 border border-gray-300 rounded mb-4"
+        />
+        <button
+          onClick={startTimer}
+          disabled={!name.trim() || timeLeft !== null}
+          className="w-full px-3 py-2 bg-black text-white rounded disabled:opacity-50"
+        >
+          Start Timer
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+        {timeLeft !== null && <p className="mt-4">Time left: {timeLeft}</p>}
+
+        {message && <p className="mt-4 font-semibold">{message}</p>}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
