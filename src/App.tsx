@@ -15,26 +15,34 @@ const quotes = [
 
 function App() {
   const [name, setName] = useState<string>("");
+
   const [duration, setDuration] = useState<number>(10);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [intervalId, setIntervalId] = useState<number | null>(null);
+
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
+  const [counter, setCounter] = useState<number>(0);
+
   const [message, setMessage] = useState<string>("");
   const [quote, setQuote] = useState<string>("");
-  const [counter, setCounter] = useState<number>(0);
-  const [intervalId, setIntervalId] = useState<number | null>(null);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
 
   useEffect(() => {
     if (timeLeft === 0) {
       clearInterval(intervalId!);
       setIntervalId(null);
       setTimeLeft(null);
-      setCounter(counter + 1);
+      setCounter((prev) => prev + 1);
+    }
+  }, [timeLeft, intervalId]);
+
+  useEffect(() => {
+    if (counter > 0) {
       setMessage(
         `You did it, ${name}! You've completed the timer ${counter} times!`
       );
       showRandomQuote();
     }
-  }, [timeLeft, intervalId]);
+  }, [counter]);
 
   useEffect(() => {
     const savedName = localStorage.getItem("username");
