@@ -5,6 +5,7 @@ function App() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [message, setMessage] = useState<string>("");
   const [intervalId, setIntervalId] = useState<number | null>(null);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -28,7 +29,8 @@ function App() {
       clearInterval(intervalId);
       setIntervalId(null);
     }
-    setTimeLeft(null); // Reset timer on input change
+    setTimeLeft(null);
+    setHasStarted(false);
   };
 
   const startTimer = () => {
@@ -36,12 +38,24 @@ function App() {
 
     setMessage("");
     setTimeLeft(10);
+    setHasStarted(true);
 
     const id = window.setInterval(() => {
       setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
 
     setIntervalId(id);
+  };
+
+  const resetAll = () => {
+    setName("");
+    setTimeLeft(null);
+    setMessage("");
+    setHasStarted(false);
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
   };
 
   return (
@@ -63,6 +77,15 @@ function App() {
         >
           Start Timer
         </button>
+
+        {hasStarted && (
+          <button
+            onClick={resetAll}
+            className="w-full mt-2 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Reset
+          </button>
+        )}
 
         {timeLeft !== null && <p className="mt-4">Time left: {timeLeft}</p>}
 
